@@ -49,11 +49,15 @@ public class GameManager : MonoBehaviour
     {
         if (lastDongle == null)
             return;     
+
         lastDongle.Drag();
     }
 
     public void TouchUp()
     {
+        if (lastDongle == null)
+            return;
+
         lastDongle.Drop();
         lastDongle = null;
     }

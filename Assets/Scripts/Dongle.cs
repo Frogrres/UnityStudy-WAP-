@@ -15,7 +15,7 @@ public class Dongle : MonoBehaviour
         anim = GetComponent<Animator>();
     }
 
-    private void OnEnable()
+    void OnEnable()
     {
         anim.SetInteger("Level", level);
     }
