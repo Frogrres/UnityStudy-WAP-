@@ -10,15 +10,18 @@ public class Dongle : MonoBehaviour
     public bool isDrag;
     public bool isMerge;
 
-    Rigidbody2D rigid;
+    public Rigidbody2D rigid;
     CircleCollider2D circle;
     Animator anim;
+    SpriteRenderer spriteRenderer;
 
+    float deadTime;
     private void Awake()
     {
         rigid = GetComponent<Rigidbody2D>();
         circle = GetComponent<CircleCollider2D>();
         anim = GetComponent<Animator>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
     void OnEnable()
@@ -90,6 +93,10 @@ public class Dongle : MonoBehaviour
         rigid.simulated = false;
         circle.enabled = false;
 
+        if(targetPos == Vector3.up * 100)
+        {
+            EffectPlay();
+        }
         StartCoroutine(HideRoutine(targetPos));
     }
 
@@ -100,10 +107,18 @@ public class Dongle : MonoBehaviour
         while(frameCount < 20)
         {
             frameCount++;
-            transform.position = Vector3.Lerp(transform.position, targetPos, 0.5f);
+            if(targetPos != Vector3.up * 100)
+            {
+                transform.position = Vector3.Lerp(transform.position, targetPos, 0.5f);
+            }
+            else if(targetPos == Vector3.up * 100)
+            {
+                transform.localScale = Vector3.Lerp(transform.localScale, Vector3.zero, 0.2f);
+            }
             yield return null;
         }
 
+        manager.score += (int)Mathf.Pow(2, level);
         isMerge = false;
         gameObject.SetActive(false);
     }
@@ -133,6 +148,31 @@ public class Dongle : MonoBehaviour
         isMerge = false;
     }
 
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        if(collision.tag == "Finish")
+        {
+            deadTime += Time.deltaTime;
+
+            if(deadTime > 2)
+            {
+                spriteRenderer.color = new Color(0.9f,0.2f,0.2f);
+            }
+            if(deadTime > 5)
+            {
+                manager.GameOver();
+            }
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if(collision.tag == "Finish")
+        {
+            deadTime = 0;
+            spriteRenderer.color = Color.white;
+        }
+    }
     void EffectPlay()
     {
         effect.transform.position = transform.position;
